@@ -1,0 +1,10 @@
+{
+    "dockerfile_lines": [],
+    "graphs": {
+      "rag_chatbot": "./develop.py:graph"
+    },
+    "python_version": "3.12",
+    "dependencies": [
+      "."
+    ]
+  }
