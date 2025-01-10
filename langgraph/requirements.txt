@@ -20,3 +20,4 @@ playwright
 trustcall
 langgraph-cli
 google
+tavily-python

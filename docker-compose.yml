@@ -68,7 +68,7 @@ services:
         restart: unless-stopped
 
 networks:
-  backend:
-    driver: bridge
-  frontend:
-    driver: bridge
+    backend:
+        driver: bridge
+    frontend:
+        driver: bridge
