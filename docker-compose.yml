@@ -53,7 +53,6 @@ services:
         build:
             context: ./gradio
             dockerfile: Dockerfile
-        container_name: gradio-app
         depends_on:
             langgraph-api:
                 condition: service_healthy
@@ -64,11 +63,8 @@ services:
             - "8501:8501"  # Map Gradio port to host for external access
         networks:
             - backend
-            - frontend
         restart: unless-stopped
 
 networks:
     backend:
-        driver: bridge
-    frontend:
         driver: bridge
