@@ -45,6 +45,12 @@ variable "LANGSMITH_API_KEY" {
   sensitive   = true
 }
 
+variable "TAVILY_API_KEY" {
+  description = "API Key"
+  type        = string
+  sensitive   = true
+}
+
 resource "aws_key_pair" "chatbot" {
   key_name   = "chatbot"
   public_key = file("/Users/kevinhsu/Downloads/chatbot.pub")
