@@ -26,6 +26,7 @@ from llama_index.llms.openai import OpenAI
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, AnyMessage, RemoveMessage
 
 from google_search import search_all
+from tavily_search import search, simple_search
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 llm = ChatOpenAI(model="gpt-4o-mini")
@@ -153,7 +154,6 @@ class Nodes():
             search = "Yes"
         
         return {"documents": filter_documents, "search": search}
-        # return {"documents": filter_documents, "question": question, "search": search}
     
     def web_search(self, state):
         """
@@ -167,10 +167,12 @@ class Nodes():
         """
 
         question = state["question"]
-        documents = search_all(question)
+        documents = simple_search(question)
+        
+        # documents = search([question])
+        # documents = search_all(question)
         logging.info(f"Documents Lens: {len(documents)}")
         return {"documents": documents}
-        # return {"documents": documents, "question": question}
     
     def decide_to_generate(self, state):
         """
