@@ -157,7 +157,7 @@ user_data = <<-EOF
   chmod 600 .env
   sudo chown ubuntu:ubuntu .env
   sudo -u ubuntu docker compose up -d
-  sudo docker compose up -d
+  # sudo docker compose up -d
 EOF
 
   tags = {
