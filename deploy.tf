@@ -152,6 +152,7 @@ user_data = <<-EOF
   cat <<EOT >> .env
   OPENAI_API_KEY=${var.OPENAI_API_KEY}
   LANGSMITH_API_KEY=${var.LANGSMITH_API_KEY}
+  TAVILY_API_KEY=${var.TAVILY_API_KEY}
   EOT
   chmod 600 .env
   sudo chown ubuntu:ubuntu .env
