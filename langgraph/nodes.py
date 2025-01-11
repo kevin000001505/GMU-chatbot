@@ -107,9 +107,10 @@ class Nodes():
     
     def answer_node(self, state):
         """Return the final response"""
-        documents = state["documents"]
+        document = state["documents"]
         question = state["question"]
-        document = "\n\n".join(documents)
+        if type(document) == list:
+            document = "\n\n".join(document)
 
         # Create an answer using the retrieved document
         prompt = f"""
@@ -167,10 +168,10 @@ class Nodes():
         """
 
         question = state["question"]
-        documents = simple_search(question)
+        # documents = simple_search(question)
         
         # documents = search([question])
-        # documents = search_all(question)
+        documents = search_all(question)
         logging.info(f"Documents Lens: {len(documents)}")
         return {"documents": documents}
     

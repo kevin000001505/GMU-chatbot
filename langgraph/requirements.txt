@@ -21,3 +21,4 @@ trustcall
 langgraph-cli
 google
 tavily-python
+git+https://github.com/stanfordnlp/dspy.git

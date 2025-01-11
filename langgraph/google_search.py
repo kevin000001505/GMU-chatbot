@@ -1,13 +1,15 @@
 import os
-import asyncio
 import time
+import asyncio
+import dspy
 
 
+
+from state import ExtractInfo, DecomposeQuestion
 from dotenv import load_dotenv
 from googlesearch import search
 from crawl4ai import AsyncWebCrawler, CacheMode
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
 
 load_dotenv()
 
@@ -15,15 +17,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Initialize LLM only once at the top
 llm = ChatOpenAI(model="gpt-4o-mini")
+lm = dspy.LM('openai/gpt-4o-mini', api_key=OPENAI_API_KEY)
+dspy.configure(lm=lm)
+asy_extract = dspy.asyncify(dspy.Predict(ExtractInfo))
+decompose_module = dspy.Predict(DecomposeQuestion)
 
-decompose_prompt = PromptTemplate(
-    template = """
-    You will be provided with a query, and your task is to generate a list of top 3 keywords that might provide the most information that can answer the query. Please list the keywords separated by newline characters without numbering or bullet points.
-    Qurey: {Query}
-    """,
-    input_variables=["Query"]
-)
-decompose_llm = decompose_prompt | llm
 
 async def multiple_crawl(links):
     """Crawl multiple URLs and return a list of crawl4ai results."""
@@ -44,7 +42,7 @@ async def multiple_crawl(links):
 async def async_search(query):
     """Asynchronously execute the synchronous search function."""
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, list, search(f"Geroge Mason University - {query}", num=1, stop=1, pause=2))
+    return await loop.run_in_executor(None, list, search(f"Geroge Mason University - {query}", num=4, stop=4, pause=2))
 
 async def handle_queries(queries):
     """Handle multiple search queries concurrently."""
@@ -56,26 +54,47 @@ async def handle_queries(queries):
             all_urls.add(url)
     return list(all_urls)
 
-def search_all(query):
+def search_all(query) -> list:
     """Search for the given queries and return the crawl4ai results."""
-    response = decompose_llm.invoke({"Query": query})
-    queries = response.content.split("\n")
+    # Decompose the query into multiple queries
+    response = decompose_module(question=query)
+    queries = response.sub_questions
+
+    # Search for multiple queries and get the URLs
     all_urls = asyncio.run(handle_queries(queries))
+
+    # Crawl the URLs and get the results
     crawl_results = asyncio.run(multiple_crawl(all_urls))
-    documents = "\n\n".join(item.markdown for item in crawl_results)
+    raw_documents = [item.markdown for item in crawl_results]
+    results = clean_content(query, raw_documents)
+    documents = [item.extract_content for item in results]
     return documents
+
+def clean_content(query, documents) -> list:
+    """Clean the content by removing the unnecessary characters."""
+    return asyncio.run(process_all_contents(query, documents))
+
+async def process_all_contents(query, contents):
+    # Create tasks by directly calling the module.apredict for each content
+    tasks = [asy_extract(text=content, query=query) for content in contents]
+    results = await asyncio.gather(*tasks)  # Run tasks concurrently
+    return results
+
+
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
     query = "What should I prepare as a freshman?"
-    response = decompose_llm.invoke({"Query": query})
-    queries = response.content.split("\n")
+    response = decompose_module(question=query)
+    queries = response.sub_questions
+    print("search: ", queries)
     all_urls = asyncio.run(handle_queries(queries))
+
+    crawl_results = asyncio.run(multiple_crawl(all_urls))
+    raw_documents = [item.markdown for item in crawl_results]
+    results = clean_content(query, raw_documents)
+    documents = [item.extract_content for item in results]
     end_time = time.perf_counter()    # End the timer
     elapsed_time = end_time - start_time
     print(f"search('{queries}') took {elapsed_time:.4f} seconds\n")
-
-    crawl_results = asyncio.run(multiple_crawl(all_urls))
-    documents = "\n\n".join(item.markdown for item in crawl_results)
-    breakpoint()
     print(documents)
