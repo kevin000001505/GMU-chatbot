@@ -156,12 +156,10 @@ user_data = <<-EOF
   EOT
   chmod 600 .env
   sudo chown ubuntu:ubuntu .env
-  if ! sudo -u ubuntu docker compose ps | grep -q "Up"; then
-    sudo -u ubuntu docker compose up -d
-  else
-    echo "Docker Compose services are already running."
-  fi
-  # sudo docker compose up -d
+  cd /home/ubuntu/GMU-chatbot
+  sudo docker compose down
+  # sudo -u ubuntu docker compose up -d
+  sudo docker compose up -d --build
 EOF
 
   tags = {
