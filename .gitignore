@@ -7,4 +7,7 @@
 *tfstate
 *.ipynb
 studio
-langgraph/__pycache__/state.cpython-312.pyc
+*.pyc
+*.json
+chainlit/chainlit.md
+chainlit/.chainlit/config.toml
