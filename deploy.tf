@@ -156,10 +156,9 @@ user_data = <<-EOF
   EOT
   chmod 600 .env
   sudo chown ubuntu:ubuntu .env
+  sudo systemctl enable docker
   cd /home/ubuntu/GMU-chatbot
-  sudo docker compose down
-  # sudo -u ubuntu docker compose up -d
-  sudo docker compose up -d --build
+  sudo docker compose up -d --build --force-recreate
 EOF
 
   tags = {

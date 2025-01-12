@@ -168,10 +168,10 @@ class Nodes():
         """
 
         question = state["question"]
-        # documents = simple_search(question)
+        documents = simple_search(question)
         
         # documents = search([question])
-        documents = search_all(question)
+        # documents = search_all(question)
         logging.info(f"Documents Lens: {len(documents)}")
         return {"documents": documents}
     
