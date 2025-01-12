@@ -20,7 +20,7 @@ def simple_search(query):
 
 # Define a function to perform a single query
 async def single_query(query):
-    response = await tavily_client.get_search_context(query, max_tokens=8000)
+    response = await tavily_client.get_search_context(f"George Mason University - {query}", max_tokens=8000)
     return response
 
 # Define a function to run multiple queries concurrently

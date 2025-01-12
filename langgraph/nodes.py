@@ -31,7 +31,7 @@ from tavily_search import search, simple_search
 from state import DecomposeQuestion
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-llm = ChatOpenAI(model="gpt-4o-mini")
+llm = ChatOpenAI(model="gpt-4o-mini", streaming=True,)
 lm = dspy.LM('openai/gpt-4o-mini', api_key=OPENAI_API_KEY)
 dspy.configure(lm=lm)
 decompose_module = dspy.Predict(DecomposeQuestion)
