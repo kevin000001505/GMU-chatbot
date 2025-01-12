@@ -9,6 +9,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 
 import qdrant_client
+import dspy
 
 # LlamaIndex core imports
 from llama_index.core import VectorStoreIndex
@@ -27,9 +28,13 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, AnyM
 
 from google_search import search_all
 from tavily_search import search, simple_search
+from state import DecomposeQuestion
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 llm = ChatOpenAI(model="gpt-4o-mini")
+lm = dspy.LM('openai/gpt-4o-mini', api_key=OPENAI_API_KEY)
+dspy.configure(lm=lm)
+decompose_module = dspy.Predict(DecomposeQuestion)
 
 Settings.llm = OpenAI(
     model="gpt-4o-mini",
@@ -168,9 +173,9 @@ class Nodes():
         """
 
         question = state["question"]
-        documents = simple_search(question)
-        
-        # documents = search([question])
+        # documents = simple_search(question)
+        response = decompose_module(question=question)
+        documents = search(response.sub_questions)
         # documents = search_all(question)
         logging.info(f"Documents Lens: {len(documents)}")
         return {"documents": documents}
