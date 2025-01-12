@@ -34,7 +34,6 @@ async def multiple_crawl(links):
             exclude_social_media_links=True,
             remove_overlay_elements=True,
             cache_mode=CacheMode.READ_ONLY,
-            fit_markdown=True,
             verbose=True
         )
         return results
@@ -54,11 +53,11 @@ async def handle_queries(queries):
             all_urls.add(url)
     return list(all_urls)
 
-def search_all(query) -> list:
+def search_all(queries) -> list:
     """Search for the given queries and return the crawl4ai results."""
     # Decompose the query into multiple queries
-    response = decompose_module(question=query)
-    queries = response.sub_questions
+    # response = decompose_module(question=query)
+    # queries = response.sub_questions
 
     # Search for multiple queries and get the URLs
     all_urls = asyncio.run(handle_queries(queries))
