@@ -31,11 +31,11 @@ async def run_multiple_queries(queries):
 
 
 # Run the queries concurrently using await
-async def run_search(queries):
+async def run_search(queries: list):
     results = await run_multiple_queries(queries)
     return results
 
-def search(queries):
+def search(queries: list):
     return asyncio.run(run_search(queries))
 
 if __name__ == "__main__":

@@ -26,12 +26,13 @@ from llama_index.llms.openai import OpenAI
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, AnyMessage, RemoveMessage
 
+from prompt import system_prompt, answer_prompt, grade_prompt
 from google_search import search_all
-from tavily_search import search, simple_search
+from tavily_search import search
 from state import DecomposeQuestion
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-llm = ChatOpenAI(model="gpt-4o-mini", streaming=True,)
+llm = ChatOpenAI(model="gpt-4o-mini", streaming=True)
 lm = dspy.LM('openai/gpt-4o-mini', api_key=OPENAI_API_KEY)
 dspy.configure(lm=lm)
 decompose_module = dspy.Predict(DecomposeQuestion)
@@ -44,30 +45,6 @@ Settings.llm = OpenAI(
     api_key=OPENAI_API_KEY,
 )
 Settings.embed_model = OpenAIEmbedding(embed_batch_size=10, api_key=OPENAI_API_KEY)
-
-# Prompt
-prompt = PromptTemplate(
-    template="""You are a teacher grading a quiz. You will be given: 
-    1/ a QUESTION
-    2/ A FACT provided by the student
-    
-    You are grading RELEVANCE RECALL:
-    A score of 1 means that ANY of the statements in the FACT are relevant to the QUESTION. 
-    A score of 0 means that NONE of the statements in the FACT are relevant to the QUESTION. 
-    1 is the highest (best) score. 0 is the lowest score you can give. 
-    
-    Explain your reasoning in a step-by-step manner. Ensure your reasoning and conclusion are correct. 
-    
-    Avoid simply stating the correct answer at the outset.
-    
-    Question: {question} \n
-    Fact: \n\n {documents} \n\n
-    
-    Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question. \n
-    Provide the binary score as a JSON with a single key 'score' and no premable or explanation.
-    """,
-    input_variables=["question", "documents"],
-)
 
 class Nodes():
     def __init__(self):
@@ -116,17 +93,13 @@ class Nodes():
         question = state["question"]
         if type(document) == list:
             document = "\n\n".join(document)
-
-        # Create an answer using the retrieved document
-        prompt = f"""
-        Based on the retrieved document:
-        {document}
-
-        Respond to the following user query:
-        {question}
-        """
-
-        response = llm.invoke(prompt)
+        system_message = system_prompt.format()
+        answer_message = answer_prompt.format(document=document, question=question)
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": answer_message}
+        ]
+        response = llm.invoke(messages)
         # return {
         #     "documents": documents,
         #     "question": question,
@@ -149,7 +122,7 @@ class Nodes():
         filter_documents = []
         search = "No"
 
-        retrieval_grader = prompt | llm | JsonOutputParser()
+        retrieval_grader = grade_prompt | llm | JsonOutputParser()
         for doc in documents:
             document = doc.node.text
             score = retrieval_grader.invoke({"question": question, "documents": document})
@@ -173,7 +146,6 @@ class Nodes():
         """
 
         question = state["question"]
-        # documents = simple_search(question)
         response = decompose_module(question=question)
         # documents = search(response.sub_questions)
         documents = search_all(question)
@@ -195,3 +167,9 @@ class Nodes():
             return "search"
         else:
             return "generate"
+        
+if __name__ == "__main__":
+    from nodes import Nodes
+    node = Nodes()
+    res = node.grade_documents({"documents": ["document"], "question": "Help me write a code"})
+    print(res)

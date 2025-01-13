@@ -64,7 +64,8 @@ system_prompt = PromptTemplate(
 
     For unclear questions:
     "Could you please clarify how your question relates to George Mason University? I'm here to help with GMU-specific inquiries."
-"""
+    """,
+    input_variables=[]
 )
 
 
