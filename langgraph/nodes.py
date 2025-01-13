@@ -147,8 +147,8 @@ class Nodes():
 
         question = state["question"]
         response = decompose_module(question=question)
-        # documents = search(response.sub_questions)
-        documents = search_all(question)
+        documents = search(response.sub_questions)
+        # documents = search_all(question)
         logging.info(f"Documents Lens: {len(documents)}")
         return {"documents": documents}
     
