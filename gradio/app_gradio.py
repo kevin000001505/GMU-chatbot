@@ -7,7 +7,7 @@ api_url = os.getenv("LANGSERVE_API_URL", "http://langgraph-api:8000")
 graph_name = os.getenv("GRAPH_NAME", "rag_chatbot")
 
 # Initialize RemoteGraph
-remote_graph = RemoteGraph("GMU_chatbot", url="http://localhost:62214")
+remote_graph = RemoteGraph(graph_name, url=api_url)
 
 def chatbot_response(question: str):
     response = remote_graph.invoke({"question": question})
@@ -15,22 +15,23 @@ def chatbot_response(question: str):
         return response['generation']['content']
     return "I'm sorry, I don't have an answer for that."
 
-async def chatbot_response_stream(question: str):
+def chatbot_response_stream(question: str, history):
+    full_response = ""
     for msg, metadata in remote_graph.stream({"question": question}, stream_mode="messages"):
-        if (
-            metadata.get("langgraph_node") == "answer_node"
-        ):  
-            yield msg['content']
+        if (metadata.get("langgraph_node") == "answer_node"):
+            full_response += msg['content']
+            yield full_response
 
 
 # Define Gradio Interface
-iface = gr.Interface(
+iface = gr.ChatInterface(
     fn=chatbot_response_stream,
-    inputs="text",
-    outputs="text",
+    # inputs="text",
+    # outputs="text",
     title="GMU Chatbot",
-    description="Ask your questions to the GMU chatbot."
+    # description="Ask your questions to the GMU chatbot.",
+    type="messages",
 )
 
 if __name__ == "__main__":
-    iface.launch(server_name="0.0.0.0", server_port=8501)
+    iface.launch(server_name="0.0.0.0", server_port=8501, share=False)
