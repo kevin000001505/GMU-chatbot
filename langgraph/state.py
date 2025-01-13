@@ -23,3 +23,8 @@ class DecomposeQuestion(dspy.Signature):
 
     question: str = dspy.InputField()
     sub_questions: list[str, str] = dspy.OutputField(desc="Decompose the quetion into sub questions. Don't generate more than 3 sub questions.")
+
+class RelatedScore(dspy.Signature):
+    url_list: list =  dspy.InputField(desc="List of URLs to be scored")
+    query: str = dspy.InputField(desc="Query to be used for scoring")
+    score: list[float] = dspy.OutputField(desc="Score of the URL that related to the query")
