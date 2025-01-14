@@ -26,10 +26,7 @@ def chatbot_response_stream(question: str, history):
 # Define Gradio Interface
 iface = gr.ChatInterface(
     fn=chatbot_response_stream,
-    # inputs="text",
-    # outputs="text",
     title="GMU Chatbot",
-    # description="Ask your questions to the GMU chatbot.",
     type="messages",
 )
 

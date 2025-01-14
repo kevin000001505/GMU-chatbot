@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 
 import qdrant_client
@@ -13,7 +12,7 @@ import dspy
 
 # LlamaIndex core imports
 from llama_index.core import VectorStoreIndex
-from llama_index.core import Settings, Document
+from llama_index.core import Settings
 
 # LlamaIndex vector store import
 from llama_index.vector_stores.qdrant import QdrantVectorStore
@@ -24,7 +23,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 # LLM import
 from llama_index.llms.openai import OpenAI
 
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, AnyMessage, RemoveMessage
+from langchain_core.messages import HumanMessage, RemoveMessage
 
 from prompt import system_prompt, answer_prompt, grade_prompt
 from google_search import search_all
@@ -100,11 +99,6 @@ class Nodes():
             {"role": "user", "content": answer_message}
         ]
         response = llm.invoke(messages)
-        # return {
-        #     "documents": documents,
-        #     "question": question,
-        #     "response": response
-        # }
         return {"generation": response}
 
     def grade_documents(self, state):
